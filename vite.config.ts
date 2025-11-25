@@ -9,5 +9,8 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+  },
+  preview: {
+    allowedHosts: ["100-razones-para-amarte.up.railway.app"]
   }
 })
