@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import HelloWorld from './components/HelloWorld.vue';
 import api from "./services/api";
+import { onMounted } from 'vue';
 
 // Tipado
 type Razon = {
@@ -34,26 +35,37 @@ const hearts = Array.from({ length: 18 }).map((_, i) => {
   return { id: i, left, delay, dur, size };
 });
 
-// Reproducir/pausar música
-const toggleMusic = () => {
-  const audio = document.getElementById(audioId) as HTMLAudioElement | null;
+onMounted(() => {
+  const audio = document.getElementById('bg-music') as HTMLAudioElement;
+
   if (!audio) return;
-  if (reproduciendo.value) {
-    audio.pause();
-    reproduciendo.value = false;
-  } else {
-    audio.volume = 0.35;
-    audio.play().catch(() => {
-      // autoplay puede fallar si no hubo interacción; ignoramos
-    });
-    reproduciendo.value = true;
-  }
-};
+
+  audio.muted = true;     // comienza mutado para evitar bloqueo
+  audio.volume = 0;       // volumen inicial en 0
+
+  // intenta reproducir inmediatamente
+  audio.play().then(() => {
+    // Quita mute después de reproducción
+    setTimeout(() => {
+      audio.muted = false;
+
+      // Fade in
+      const fadeIn = setInterval(() => {
+        if (audio.volume < 1) {
+          audio.volume += 0.02;
+        } else {
+          clearInterval(fadeIn);
+        }
+      }, 200);
+    }, 300);
+  }).catch(() => {
+    console.log("Autoplay bloqueado hasta interacción del usuario.");
+  });
+});
 
 // Función principal: trae razones y las va tipeando una por una
 const cargarRazones = async () => {
   try {
-    toggleMusic();
     cargando.value = true;
     // iniciar música
     const audio = document.getElementById(audioId) as HTMLAudioElement | null;
@@ -94,6 +106,15 @@ const cargarRazones = async () => {
 
 <template>
   <div class="page">
+    <audio
+      id="bg-music"
+      src="./assets/Ed_Sheeran_Perfect.mp3"
+      autoplay
+      loop
+      muted
+      preload="auto"
+    ></audio>
+
     <!-- corazones flotando (fondo) -->
     <div class="hearts" aria-hidden="true">
       <span
