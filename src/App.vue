@@ -94,7 +94,7 @@ const cargarRazones = async () => {
 
 <template>
   <div class="page">
-    zones flotando (fondo) -->
+    <!-- corazones flotando (fondo) -->
     <div class="hearts" aria-hidden="true">
       <span
         v-for="h in hearts"
